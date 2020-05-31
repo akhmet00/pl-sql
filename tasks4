@@ -1,0 +1,193 @@
+1) create procedure which returns employee salary, maximum and minimum salary for his job title. input parameters : lastnamme, firstname. output parameters: salary, jobtitle, maxsalary, min salary.
+create or replace procedure salary(lastname varchar2, firstname varchar2)
+as
+job_t varchar2(50);
+sal number;
+max_s number;
+min_s number;
+begin
+select j.job_title into job_t
+from employees e join jobs j on j.job_id = e.job_id
+where e.last_name = lastname and e.first_name = firstname;
+select e.salary into sal
+from employees e join jobs j on j.job_id = e.job_id
+where e.last_name = lastname and e.first_name = firstname;
+select  j.max_salary into max_s
+from employees e join jobs j on j.job_id = e.job_id
+where e.last_name = lastname and e.first_name = firstname;
+select  j.min_salary into min_s
+from employees e join jobs j on j.job_id = e.job_id
+where e.last_name = lastname and e.first_name = firstname;
+dbms_output.put_line(job_t || ' ' || sal || ' ' || max_s || '' || min_s );
+end;
+
+set serveroutput on
+DECLARE
+  LASTNAME VARCHAR2(200);
+  FIRSTNAME VARCHAR2(200);
+BEGIN
+  LASTNAME := &LASTNAME;
+  FIRSTNAME := &FIRSTNAME;
+  SALARY(LASTNAME,FIRSTNAME);
+END;
+ 
+2) find job title which occupied   the least . write select query.
+ 
+select job_title, count(employee_id)
+from employees e join jobs j on e.job_id = j.job_id
+group by job_title
+
+3) procedure which returns number of employees whose salary is less than min salary for his position. write script to see results.
+
+create or replace procedure numemp(fname varchar2, lname varchar2)
+as
+emp_num number;
+begin
+select count(e.employee_id) into emp_num
+from employees e join jobs j on j.job_id=e.job_id
+where e.first_name = fname and e.last_name = lname and j.min_salary > e.salary;
+dbms_output.put_line(emp_num);
+end;
+
+set serveroutput on
+DECLARE
+  FNAME VARCHAR2(200);
+  LNAME VARCHAR2(200);
+BEGIN
+  FNAME := &FNAME;
+  LNAME := &LNAME;
+  NUMEMP(
+    FNAME,LNAME
+  );
+END;
+ 
+4) create function which raises number to power. 2 input parameter.
+ 
+CREATE OR REPLACE FUNCTION FUNCTION1(n1 in number, n2 in number)
+RETURN number as n number(20);
+BEGIN
+n:=power(n1, n2);
+RETURN n;
+END;
+set serveroutput on;
+DECLARE
+  N1 NUMBER;
+  N2 NUMBER;
+  v_Return NUMBER;
+BEGIN
+  N1 := &N1;
+  N2 := &N2;
+  v_Return := FUNCTION1(
+   N1,N2
+  );
+  dbms_output.put_line(v_Return);
+end;
+ 
+5) create procedure which returns department city and country by department name. 2 output parameters: city, country. write script to see result.
+
+CREATE or replace PROCEDURE EXERCISE(cname varchar2)
+AS
+cnname varchar2(50);
+cyy varchar2(50);
+begin
+SELECT COUNTRY_NAME into cnname
+FROM COUNTRIES JOIN LOCATIONS USING (COUNTRY_ID)
+JOIN DEPARTMENTS USING (LOCATION_ID)
+Where departments.department_name = cname;
+SELECT CITY into cyy
+FROM COUNTRIES JOIN LOCATIONS USING (COUNTRY_ID)
+JOIN DEPARTMENTS USING (LOCATION_ID)
+Where departments.department_name = cname;
+DBMS_OUTPUT.PUT_LINE(cnname||'  '||cyy);
+end;
+
+6) find all managers who has  10 employees. write select query.columns to return: manager lastname, firstname
+
+select first_name, last_name from employees where employee_id in (select manager_id from employees group by manager_id having count(employee_id)>2)
+set serveroutput on;
+DECLARE
+  CNAME VARCHAR2(200);
+BEGIN
+  CNAME := &CNAME;
+  EXERCISE(
+    CNAME
+  );
+END;
+
+7) create function which returns manager id of given employee id
+ 
+CREATE OR REPLACE FUNCTION FUNCTION1(n1 in number)
+RETURN varchar2 as n varchar2(50);
+BEGIN
+select manager_id into n
+from employees
+where employee_id = n1;
+RETURN n;
+END;
+DECLARE
+  N1 NUMBER;
+  v_Return VARCHAR2(200);
+BEGIN
+  N1 := &N1;
+  v_Return := FUNCTION1(
+    N1
+  );
+ 
+DBMS_OUTPUT.PUT_LINE('Return = ' || v_Return);
+END;
+ 
+8) create procedure which returns manager of given employee. output parameters: lastname, firstname, jobtitle. intput parameters: employee lastname, firstname
+
+CREATE or REPLACE PROCEDURE PROCEDURE1(lll varchar2,fff varchar2)
+AS
+llastName varchar(50);
+ffirstName varchar(50);
+j_title varchar(50);
+managerdd number;
+BEGIN
+select manager_id into managerdd
+from employees
+where e.last_name=lll and e.first_name=fff;
+select first_name||' '||last_name into llastName from employees e where e.last_name=lll and e.first_name=fff;
+select job_title into j_title from jobs;
+DBMS_OUTPUT.PUT_LINE(llastname||' '|| j_title||' '|| managerdd);
+END;
+
+DECLARE
+  LLL VARCHAR2(200);
+  FFF VARCHAR2(200);
+BEGIN
+  LLL := &LLL;
+  FFF := &FFF;
+  PROCEDURE1(
+    LLL
+    FFF
+  );
+END;
+
+9)
+write selectquery. count employees for every department and use CASE. if number of employees <10 return 'less than 10, if numner of employees between 10 and 20 then 'average' otherwise 'bunch of people'. columns: department name, cases(for column with CASE)
+
+select department_name, case 
+when count(employee_id)<10 then 'less than 10'
+when count(employee_id)>10 and count(employee_id)<20 then 'average'
+else 'bunch of people'
+end
+as cases
+from employees e join departments d on e.department_id = d.department_id
+group by department_name;
+ 
+10) function which returns deparment name of given employee. input parameter: employee firstname, lastname.
+create or replace function FUNCTION2(Fname in VARCHAR2, Lname in VARCHAR2)
+
+RETURN VARCHAR2 IS
+iid VARCHAR2(20);
+BEGIN
+SELECT d.department_name into iid
+FROM departments d, employees e
+WHERE Fname=e.first_name
+AND Lname=e.last_name
+AND d.department_id=e.department_id;
+RETURN iid;
+END FUNCTION2;
+SELECT FUNCTION2('Steven','King') from employees;
