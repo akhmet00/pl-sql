@@ -1,0 +1,94 @@
+1. create table mycontacts with columns id, name, phonenumber, operator. id is primary key, name and phonenumber cannot be null. id is number, other columns varchar2. insert some contacts of yours. also create contact with name mom
+
+
+CREATE table mycontacts (
+idd number(20) primary key,
+nname VARCHAR2(25) constraint myct_name_nn NOT NULL,
+phonenumber VARCHAR2(20) constraint myct_number_nn NOT NULL,
+operatorr VARCHAR2(20)
+);
+insert into mycontacts (idd,nname,phonenumber,operatorr) values (1,'nurzh','77771234567', 'Beeline');
+insert into mycontacts (idd,nname,phonenumber,operatorr) values (2,'sulin','77071234567', 'Kcell');
+insert into mycontacts (idd,nname,phonenumber,operatorr) values (3,'mom','77051234567', 'Altel');
+
+ 
+
+2. create sequence mysequense for id values in table mycontacts
+
+create sequence mysequence
+minvalue 1
+start with 4
+increment by 1
+nocache;
+
+insert into mycontacts (idd,nname,phonenumber,operatorr) values (mysequence.nextval,'khadi','77777654321', 'Beeline');
+
+ 
+
+3. create trigger to generate and insert id into table mycontacts
+
+
+CREATE OR REPLACE TRIGGER TRIGGER2
+BEFORE INSERT ON MYCONTACTS
+for each row
+BEGIN
+if :new.idd is null then
+select mysequence.nextval into :new.idd from dual;
+end if;
+END;
+
+insert into mycontacts (nname,phonenumber,operatorr) values ('khaled','77077654321', 'Active');
+
+ 
+
+4.
+
+create trigger which defines operator and inserts it into operator column of mycontacts table. for example if first three numbers = '777' then operator is beeline if '701' then 'active'; use :new pseudocode
+
+CREATE OR REPLACE TRIGGER TRIGGER3
+BEFORE INSERT ON MYCONTACTS
+FOR EACH ROW
+DECLARE
+pnumber varchar2(250);
+oper varchar2(250);
+BEGIN
+pnumber := SUBSTR(:new.phonenumber,0,3);
+IF(SUBSTR(:new.phonenumber,0,3) = '777' ) THEN
+oper := 'BEELINE';
+END IF;
+IF(SUBSTR(:new.phonenumber,0,3) = '701' ) THEN
+oper := 'ACTIV';
+END IF;
+IF(SUBSTR(:new.phonenumber,0,3) = '778' ) THEN
+oper := 'KCEELL';
+END IF;
+SELECT oper
+INTO :new.operatorr
+FROM dual;
+END;
+
+INSERT INTO MYCONTACTS (nname,phonenumber)
+VALUES ('Testnumb1','778111160')
+
+
+
+insert into mycontacts (nname,phonenumber)
+values ('Testnumb1','700100560')
+
+
+5.  create trigger which does not allow to delete your mom contacts.
+
+CREATE OR REPLACE TRIGGER TRIGGER1
+BEFORE delete ON MYCONTACTS
+for each row
+when (old.nname = 'mom')
+declare
+momexception exception;
+pragma exception_init(momexception, -20001);
+BEGIN
+raise momexception;
+END;
+
+delete from mycontacts where nname='mom';
+
+ 
