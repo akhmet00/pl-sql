@@ -1,0 +1,166 @@
+1. create table MY_EMP with columns  FIRSTNAME, LASTNAME, JOBTITLE, DEPARTMENT, PHONE, MAIL, SALARY. datatype of columns same as similar columns in table employees.
+
+2. create procedure which  inserts data in table  MY_EMP.  input parameters: same as columns.
+
+3. create procedure which deletes information. input parameters: firstname, lastname.
+
+4. create function which returns all information  about employee in table  MY_EMP. return information in RECORD datatype. input parameters: firstname, lastname. 
+
+5.  create procedure which updates  salary of employee in  MY_EMP table. input parameters: firstname, lastname, new salary.  add exceptions.
+
+6.  create procedure which inserts information form employees table to MY_EMP table from task 1 by employee_id. add exceptions.
+1. CREATE TABLE MY_EMP ( first_name VARCHAR2(20) , last_name VARCHAR2(25)
+
+CONSTRAINT my_emp_last_name_nn NOT NULL ,
+
+email VARCHAR2(25) CONSTRAINT my_emp_email_nn NOT NULL,
+
+phone_number VARCHAR2(20) ,
+
+job_title VARCHAR2(10) CONSTRAINT my_emp_job_nn NOT NULL ,
+
+salary NUMBER(8,2) ,
+
+department_id NUMBER(4) , CONSTRAINT my_emp_salary_min CHECK (salary > 0) ,
+
+CONSTRAINT my_emp_email_uk UNIQUE (email) ) ;
+
+2. CREATE OR REPLACE PROCEDURE PROCEDURE1 (first_name IN MY_EMP.first_name%TYPE,
+
+last_name IN MY_EMP.last_name%TYPE,
+
+email IN MY_EMP.email%TYPE,
+
+phone_number IN MY_EMP.phone_number%TYPE,
+
+job_title IN MY_EMP.job_title%TYPE,
+
+salary IN MY_EMP.salary%TYPE,
+
+department_id IN MY_EMP.department_id%TYPE )
+
+IS
+
+BEGIN
+
+insert into MY_EMP (first_name, last_name, email, phone_number, job_title, salary, department_id)
+
+values (first_name, last_name, email, phone_number, job_title, salary, department_id);
+
+COMMIT;
+
+END PROCEDURE1;
+
+BEGIN
+
+PROCEDURE1('Steven','King','mail@mail.ru','7777-7777','President',24000,100);
+
+END;
+
+3. CREATE OR REPLACE PROCEDURE PROCEDURE2 (first_name IN MY_EMP.first_name%TYPE,last_name IN MY_EMP.last_name%TYPE )
+
+IS
+
+BEGIN
+
+DELETE FROM MY_EMP WHERE first_name=first_name and last_name=last_name;
+
+COMMIT;
+
+END PROCEDURE2;
+
+BEGIN
+
+PROCEDURE2('Steven','King');
+
+END;
+
+ 
+
+ 
+
+4.
+
+CREATE OR REPLACE FUNCTION FUNCTION1(
+
+first_name IN MY_EMP.first_name%TYPE,
+
+last_name IN MY_EMP.last_name%TYPE )
+
+RETURN VARCHAR2 is pdetails varchar2(255);
+
+BEGIN
+
+SELECT 'Name-'||first_name||' '|| last_name||', email-'|| email||', phonenumber-'||phone_number||', jobtitle-'||job_title||', salary-'||salary||', department-'||department_id into pdetails from MY_EMP where first_name = first_name and last_name=last_name; return(pdetails);
+
+END FUNCTION1;
+
+ 
+
+ 
+
+5. CREATE OR REPLACE PROCEDURE UPDATESAL (first_name IN MY_EMP.first_name%TYPE,last_name IN MY_EMP.last_name%TYPE, new_salary IN MY_EMP.salary%TYPE )
+
+IS
+
+salary_exception EXCEPTION;
+
+BEGIN
+
+if new_salary<=0 then
+
+RAISE salary_exception;
+
+else UPDATE MY_EMP SET salary=new_salary
+
+WHERE first_name=first_name and last_name=last_name;
+
+end if;
+
+EXCEPTION
+
+WHEN salary_exception THEN
+
+dbms_output.put_line('Salary must be greater than zero');
+
+WHEN no_data_found THEN
+
+dbms_output.put_line('No data found');
+
+COMMIT;
+
+END;
+
+ 
+
+6. CREATE OR REPLACE PROCEDURE INSERTTABLE (old_empl IN EMPLOYEES.employee_id%TYPE )
+
+IS
+
+BEGIN
+
+INSERT INTO MY_EMP (first_name, last_name, email, phone_number, job_title, salary, department_id)
+
+SELECT first_name,last_name,email,phone_number,job_id,salary,department_id FROM employees
+
+WHERE employee_id=old_empl;
+
+EXCEPTION
+
+WHEN no_data_found THEN
+
+dbms_output.put_line('No data found');
+
+WHEN dup_val_on_index THEN
+
+dbms_output.put_line('Already exhists');
+
+COMMIT;
+
+END;
+
+BEGIN
+
+INSERTTABLE(100);
+
+END;
