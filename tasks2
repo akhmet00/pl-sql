@@ -1,0 +1,164 @@
+create package my_pkg_for_emp. all function and procedure must be public.
+
+in the package create following:
+
+1)  type emp_info record, which consists of   lastname, firstname, department name, job title, salary, birthdate, phonenumber
+
+2) function, which returns information about employee  in emp_info record datatype, input parameter:employee id
+
+3) procedure, which changes employee lastname, input parameters: employee_id , new lastname
+
+4) function, which returns employees managers full name. input parameter:employee_id
+
+5) function, which return employees email. input parameter:employee_id
+
+6)procedure, which changes employee salary, input parameters: employee_id , new salary
+1.
+CREATE OR REPLACE
+PACKAGE MY_PKG_FOR_EMP AS
+type emp_info is record (
+first_name VARCHAR2(20),
+last_name VARCHAR2(25),
+department_name VARCHAR2(25),
+job_title VARCHAR2(25),
+salary NUMBER(8,2),
+hire_date DATE,
+phonenumber VARCHAR2(20)
+);
+
+
+2.
+function returninfo (employeeid in employees.employee_id%TYPE)
+return emp_info;
+
+function returninfo(employeeid in employees.employee_id%TYPE)
+return emp_info
+is
+inf emp_info;
+begin
+select e.last_name, e.first_name, d.department_name, j.job_title, e.salary, e.hire_date, e.phone_number into inf
+from employees e join jobs j
+on e.job_id = j.job_id
+join departments d
+on e.department_id = d.department_id
+where employee_id=employeeid;
+return inf;
+end returninfo;
+
+ 
+
+ 
+
+declare
+empid number;
+returnfunc sysman.my_pkg_for_emp.emp_info;
+begin
+empid := &empid;
+
+returnfunc := my_pkg_for_emp.returninfo(
+empid
+);
+dbms_output.put_line('firstname = ' || returnfunc.first_name ||' lastname = ' || returnfunc.last_name
+||' department = ' || returnfunc.department_name ||' jobtitle = '
+|| returnfunc.job_title ||' salary = ' || returnfunc.salary ||' hiredate = '
+|| returnfunc.hire_date ||' phonenumber = ' || returnfunc.phonenumber);
+
+end;
+
+
+3.
+procedure updatelastname(
+employeeid in employees.employee_id%TYPE,
+lastname in employees.last_name%TYPE
+);
+
+procedure updatelastname(
+employeeid in employees.employee_id%TYPE,
+lastname in employees.last_name%TYPE
+)
+is
+begin
+update employees set last_name=lastname where employee_id = employeeid;
+end updatelastname;
+
+
+begin
+my_pkg_for_emp.updatelastname(100,'Deking');
+end;
+
+
+4.
+function returnmanager(employeeid in employees.employee_id%TYPE)
+return varchar2;
+
+function returnmanager(employeeid in employees.employee_id%TYPE)
+return varchar2
+as
+output varchar2(50);
+begin
+select concat(e.first_name ,concat(',',e.last_name)) into output
+from employees e
+where e.employee_id = (select m.manager_id from employees m where m.employee_id = employeeid);
+return output;
+end returnmanager;
+
+declare
+empid NUMBER;
+returnfunc VARCHAR2(25);
+begin
+empid := &empid;
+
+returnfunc := my_pkg_for_emp.returnmanager(
+empid
+);
+dbms_output.put_line(returnfunc);
+end;
+
+5.
+
+function returnemail(
+employeeid in employees.employee_id%TYPE
+)
+return varchar2;
+
+function returnemail(employeeid in employees.employee_id%TYPE)
+return VARCHAR2 is
+res VARCHAR2(25);
+begin
+select email into res from employees where employee_id=employeeid;
+return res;
+end;
+
+declare
+employeeid NUMBER;
+returnfunc VARCHAR2(25);
+begin
+employeeid:= 100;
+returnfunc:= my_pkg_for_emp.returnemail(employeeid);
+dbms_output.put_line(returnfunc);
+end;
+
+
+6.
+
+procedure updatesalary(
+employeeid in employees.employee_id%TYPE,
+newsalary in employees.salary%TYPE
+);
+
+procedure updatesalary(
+employeeid in employees.employee_id%TYPE,
+newsalary in employees.salary%TYPE
+)
+is
+begin
+update employees set salary=newsalary where employee_id = employeeid;
+end updatesalary;
+
+begin
+my_pkg_for_emp.updatesalary(100,27300);
+end;
+
+ 
+
+ 
